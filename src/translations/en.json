@@ -22,7 +22,23 @@
     "updating": "Updating",
     "going_to_target": "Going to target",
     "zoned_cleaning": "Zoned cleaning",
-    "segment_cleaning": "Segment cleaning"
+    "segment_cleaning": "Segment cleaning",
+    "charged": "Charged",
+    "standby": "Standby",
+    "sleeping": "Sleeping",
+    "mopping": "Mopping",
+    "drying": "Drying",
+    "auto_empty": "Auto empty",
+    "dust_collecting": "Dust collecting",
+    "go_charging": "Going to charge",
+    "off": "Off",
+    "sweeping": "Sweeping",
+    "unknown": "Unknown",
+    "waiting": "Waiting",
+    "working": "Working",
+    "completed": "Completed",
+    "ready": "Ready",
+    "full": "Full"
   },
   "source": {
     "gentle": "Gentle",
@@ -62,6 +78,8 @@
   "editor": {
     "entity": "Entity (Required)",
     "map": "Map Camera (Optional)",
+    "battery_entity": "Battery Entity (Optional)",
+    "status_entity": "Status Entity (Optional)",
     "image": "Image (Optional)",
     "compact_view": "Compact View",
     "compact_view_aria_label_on": "Toggle compact view on",

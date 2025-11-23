@@ -16,10 +16,11 @@ import {
   VacuumCardAction,
   VacuumCardConfig,
   VacuumEntity,
-  HassEntity,
+  HassEntityBase,
   VacuumEntityState,
   VacuumServiceCallParams,
   VacuumActionParams,
+  VacuumBatteryEntity,
 } from './types';
 import DEFAULT_IMAGE from './vacuum.svg';
 
@@ -60,9 +61,23 @@ export class VacuumCard extends LitElement {
 
   static getStubConfig(_: unknown, entities: string[]) {
     const [vacuumEntity] = entities.filter((eid) => eid.startsWith('vacuum'));
+    const [vacuumBatteryEntity] = entities.filter(
+      (eid) =>
+        eid.startsWith('sensor') &&
+        eid.includes('battery') &&
+        eid.includes('vacuum'),
+    );
+    const [vacuumStatusEntity] = entities.filter(
+      (eid) =>
+        eid.startsWith('sensor') &&
+        eid.includes('stav') &&
+        eid.includes('roborock'),
+    );
 
     return {
       entity: vacuumEntity ?? '',
+      battery_entity: vacuumBatteryEntity ?? '',
+      status_entity: vacuumStatusEntity ?? '',
     };
   }
 
@@ -70,7 +85,11 @@ export class VacuumCard extends LitElement {
     return this.hass.states[this.config.entity] as VacuumEntity;
   }
 
-  get map(): HassEntity | null {
+  get batteryEntity(): VacuumBatteryEntity {
+    return this.hass.states[this.config.battery_entity] as VacuumBatteryEntity;
+  }
+
+  get map(): HassEntityBase | null {
     if (!this.hass || !this.config.map) {
       return null;
     }
@@ -86,7 +105,48 @@ export class VacuumCard extends LitElement {
   }
 
   public shouldUpdate(changedProps: PropertyValues): boolean {
-    return hasConfigOrEntityChanged(this, changedProps, false);
+    // Check if config or main entity changed
+    if (hasConfigOrEntityChanged(this, changedProps, false)) {
+      return true;
+    }
+
+    // Check if any stats entity changed
+    if (changedProps.has('hass') && this.config?.stats) {
+      const oldHass = changedProps.get('hass');
+      if (oldHass) {
+        // Get all entity IDs used in stats
+        const statsEntityIds = new Set<string>();
+        Object.values(this.config.stats).forEach((statsList) => {
+          statsList.forEach((stat) => {
+            if (stat.entity_id) {
+              statsEntityIds.add(stat.entity_id);
+            }
+          });
+        });
+
+        // Add battery entity if configured
+        if (this.config.battery_entity) {
+          statsEntityIds.add(this.config.battery_entity);
+        }
+
+        // Add status entity if configured
+        if (this.config.status_entity) {
+          statsEntityIds.add(this.config.status_entity);
+        }
+
+        // Check if any of the stats entities changed
+        for (const entityId of statsEntityIds) {
+          const oldState = oldHass.states[entityId];
+          const newState = this.hass.states[entityId];
+
+          if (oldState !== newState) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
   }
 
   protected updated(changedProps: PropertyValues) {
@@ -217,7 +277,16 @@ export class VacuumCard extends LitElement {
   }
 
   private renderBattery(): Template {
-    const { battery_level, battery_icon } = this.getAttributes(this.entity);
+    const { battery_level, battery_icon } =
+      this.config.battery_entity && this.hass.states[this.config.battery_entity]
+        ? (() => {
+            const batteryEntity = this.hass.states[this.config.battery_entity];
+            return {
+              battery_level: Number(batteryEntity.state),
+              battery_icon: batteryEntity.attributes.icon || 'mdi:battery',
+            };
+          })()
+        : this.getAttributes(this.entity);
 
     return html`
       <div class="tip" @click="${() => this.handleMore()}">
@@ -315,19 +384,50 @@ export class VacuumCard extends LitElement {
   }
 
   private renderStatus(): Template {
-    const { status } = this.getAttributes(this.entity);
-    const localizedStatus =
-      localize(`status.${status.toLowerCase()}`) || status;
-
     if (!this.config.show_status) {
       return nothing;
     }
 
+    let displayStatus: string;
+
+    // If status_entity is configured, use only that
+    if (
+      this.config.status_entity &&
+      this.hass.states[this.config.status_entity]
+    ) {
+      const statusEntity = this.hass.states[this.config.status_entity];
+      const statusRaw = statusEntity.state;
+
+      // Try to localize the status
+      let localizedStatus =
+        localize(`status.${statusRaw.toLowerCase()}`) || statusRaw;
+
+      // Smart battery status: show "charged" instead of "charging" when battery is 100%
+      if (
+        localizedStatus === localize('status.charging') ||
+        statusRaw?.toLowerCase() === 'charging'
+      ) {
+        const batteryLevel =
+          this.config.battery_entity &&
+          this.hass.states[this.config.battery_entity]
+            ? Number(this.hass.states[this.config.battery_entity].state)
+            : this.getAttributes(this.entity).battery_level;
+
+        if (batteryLevel && batteryLevel >= 100) {
+          localizedStatus = localize('status.charged') || localizedStatus;
+        }
+      }
+
+      displayStatus = localizedStatus;
+    } else {
+      // Fallback to main vacuum entity status
+      const { status } = this.getAttributes(this.entity);
+      displayStatus = localize(`status.${status.toLowerCase()}`) || status;
+    }
+
     return html`
       <div class="status">
-        <span class="status-text" alt=${localizedStatus}>
-          ${localizedStatus}
-        </span>
+        <span class="status-text" alt=${displayStatus}> ${displayStatus} </span>
         <ha-circular-progress
           .indeterminate=${this.requestInProgress}
           size="small"

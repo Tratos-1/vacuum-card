@@ -27,11 +27,21 @@ export interface VacuumEntityAttributes extends HassEntityAttributeBase {
   fan_speed_list?: string[];
   battery_level?: number;
   battery_icon?: string;
+  friendly_name?: string;
 }
 
 export interface VacuumEntity extends HassEntityBase {
   attributes: VacuumEntityAttributes;
   state: VacuumEntityState;
+}
+
+export interface VacuumBatteryEntityAttributes extends HassEntityAttributeBase {
+  icon?: string;
+}
+
+export interface VacuumBatteryEntity extends HassEntityBase {
+  attributes: VacuumBatteryEntityAttributes;
+  state: string;
 }
 
 export interface VacuumCardStat {
@@ -58,6 +68,8 @@ export interface VacuumCardShortcut {
 
 export interface VacuumCardConfig {
   entity: string;
+  battery_entity: string;
+  status_entity: string;
   map: string;
   map_refresh: number;
   image: string;
