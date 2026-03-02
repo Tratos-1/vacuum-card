@@ -75,6 +75,19 @@
   "warning": {
     "actions_array": "WARNING: 'actions' is reserved to override default actions for existing buttons. If your intention was to add additional actions, use the 'shortcuts' option instead."
   },
+  "dock_error": {
+    "water_empty": "Dock: Water tank empty",
+    "wash_tank_empty": "Dock: Wash tank empty",
+    "waste_tank_full": "Dock: Waste water tank full",
+    "clean_tank_full": "Dock: Clean water tank full",
+    "no_mop": "Dock: Mop pad not installed",
+    "dust_box_full": "Dock: Dust bag full",
+    "disconnected": "Dock: Disconnected",
+    "drain_blocked": "Dock: Drain blocked",
+    "wash_pad_full": "Dock: Wash pad dirty",
+    "dirty_tank_blocked": "Dock: Dirty water tank blocked",
+    "clean_tank_blocked": "Dock: Clean water tank blocked"
+  },
   "editor": {
     "entity": "Entity (Required)",
     "map": "Map Camera (Optional)",

@@ -230,6 +230,12 @@ ha-card {
   right: var(--vc-spacing);
 }
 
+.dock-error-inline {
+  color: var(--error-color, #db4437);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
 .vacuum-name {
   text-align: center;
   font-weight: bold;

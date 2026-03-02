@@ -70,6 +70,7 @@ export interface VacuumCardConfig {
   entity: string;
   battery_entity: string;
   status_entity: string;
+  dock_error_entity: string;
   map: string;
   map_refresh: number;
   image: string;

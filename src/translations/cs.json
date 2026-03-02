@@ -72,6 +72,19 @@
   "warning": {
     "actions_array": "VAROVÁNÍ: 'actions' jsou rezervovány pro přepsání původních akcí u existujících tlačítek. Pokud jste chtěli měli v plánu přidat další akce, použijte namísto toho možnost 'shortcuts'."
   },
+  "dock_error": {
+    "water_empty": "Chybí voda v doku",
+    "wash_tank_empty": "Prázdná nádrž pro mytí",
+    "waste_tank_full": "Nádrž špinavé vody je plná",
+    "clean_tank_full": "Nádrž čisté vody je plná",
+    "no_mop": "Mop pad není nainstalován",
+    "dust_box_full": "Sáček na prach je plný",
+    "disconnected": "Dok odpojen",
+    "drain_blocked": "Odtok je zablokován",
+    "wash_pad_full": "Mop pad je špinavý",
+    "dirty_tank_blocked": "Nádrž špinavé vody je zablokována",
+    "clean_tank_blocked": "Nádrž čisté vody je zablokována"
+  },
   "editor": {
     "entity": "Entita (Povinný)",
     "map": "Mapa (Nepovinný)",

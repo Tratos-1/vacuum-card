@@ -135,6 +135,11 @@ export class VacuumCard extends LitElement {
           statsEntityIds.add(this.config.status_entity);
         }
 
+        // Add dock error entity if configured
+        if (this.config.dock_error_entity) {
+          statsEntityIds.add(this.config.dock_error_entity);
+        }
+
         // Check if any of the stats entities changed
         for (const entityId of statsEntityIds) {
           const oldState = oldHass.states[entityId];
@@ -465,12 +470,48 @@ export class VacuumCard extends LitElement {
 
     return html`
       <div class="status">
-        <span class="status-text" alt=${displayStatus}> ${displayStatus} </span>
+        <span class="status-text" alt=${displayStatus}>
+          ${displayStatus}${this.renderDockErrorInline()}
+        </span>
         <ha-circular-progress
           .indeterminate=${this.requestInProgress}
           size="small"
         ></ha-circular-progress>
       </div>
+    `;
+  }
+
+  private renderDockErrorInline(): Template {
+    if (
+      !this.config.dock_error_entity ||
+      !this.hass.states[this.config.dock_error_entity]
+    ) {
+      return nothing;
+    }
+
+    const dockErrorEntity = this.hass.states[this.config.dock_error_entity];
+    const errorState = dockErrorEntity.state;
+
+    const noErrorValues = ['none', '0', 'ok', 'unavailable', 'unknown', ''];
+    if (noErrorValues.includes(errorState.toLowerCase())) {
+      return nothing;
+    }
+
+    const translatedError =
+      localize(`dock_error.${errorState.toLowerCase()}`) ||
+      localize(`status.${errorState.toLowerCase()}`) ||
+      errorState;
+
+    return html`
+      <span
+        class="dock-error-inline"
+        @click=${(e: Event) => {
+          e.stopPropagation();
+          this.handleMore(this.config.dock_error_entity);
+        }}
+      >
+        &nbsp;-&nbsp;${translatedError}
+      </span>
     `;
   }
 
